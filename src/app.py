@@ -1,21 +1,18 @@
-
 # importing lybraries
-from dash import Dash, dcc
-from dash import html 
+from dash import Dash, dcc, html
 import dash_bootstrap_components as dbc
 import pandas as pd
-#from datetime import date
 from datetime import datetime as dt
 import calendar
 from dash_extensions import Lottie
 from dash.dependencies import Input, Output
 import plotly.express as px
-#from wordcloud import WordCloud
 
 
 # creating a dash application
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
-server = app.server
+#server = app.server
+
 
 # import data from csv sheets **********************************************************
 agency_type_immap_id_labels_df_2 = pd.read_csv('agency_type_immap_id_labels_df_2.csv', low_memory=False, encoding="iso-8859-1")
@@ -23,13 +20,17 @@ IM_service_request_df = pd.read_csv('IM_service_request_df.csv', low_memory=Fals
 capacity_building_df = pd.read_csv('capacity_building_df.csv', low_memory=False, encoding="iso-8859-1")
 dfIssues = pd.read_csv('dfIssues.csv', low_memory=False, encoding="iso-8859-1")
 
+# temporary
+summary_list = ["IM Service Request", "Capacity Building" ]
+dfIssues = dfIssues[dfIssues['Summary'].isin(summary_list)]
+
 # Craetind data registration data frame
 df_registration = dfIssues.copy()
 df_registration["created_date"] = pd.to_datetime(df_registration["created_date"])
 df_registration = df_registration.sort_values(by="created_date")
 
 # Calculate the timestamps for each year
-start_date = df_registration["created_date"][0]
+start_date = df_registration["created_date"].min()
 end_date = dt.now()
 years_range = range(start_date.year, end_date.year + 1)  # Include the current year
 timestamps = [int(dt(year, 1, 1).timestamp()) for year in years_range]
@@ -57,15 +58,113 @@ df_forms_cb = capacity_building_df.copy()
 list_organizations_assisted = list(df_forms_cb["agency_name.text"].unique()) + list(df_forms_sr["agency_name.text"].unique())
 organizations_assisted_number = len(set(list_organizations_assisted))
 
-# Putting agency_type label into df_issues dataframe.
-df_agency_type_sr= IM_service_request_df[["Key","agency_type.choices"]].copy()
-df_agency_type_cb= capacity_building_df[["Key","agency_type.choices"]].copy()
+# Creating agency_type dataframe.
+df_agency_type_sr= IM_service_request_df[["Key",'agency_type.choices0']].copy()
+df_agency_type_cb= capacity_building_df[["Key",'agency_type.choices0']].copy()
 df_agency_type_df = pd.concat([df_agency_type_sr, df_agency_type_cb], ignore_index=True)
-df_agency_type_df["agency_type.choices"] =  df_agency_type_df["agency_type.choices"].apply(lambda x: x[2])
-df_agency_type_df["agency_type.label"] = ['Academia' if v == "1" else 'Government Agency' if v == "5" else 'INGO' if v=="2" else 'NNGO' if v=="3" else 'UN Agency' if v=="4" else 'Other' for v in list(df_agency_type_df["agency_type.choices"])]
-# Merge the two DataFrames based on the 'key' column
 df_issues_agency_type = pd.merge(df_agency_type_df, df_issues, on='Key', how='outer')
-#print(df_issues_agency_type)
+
+# Creating locations dataframe.
+# locations in IM_service_request_df
+list_columns_IM= [col for col in IM_service_request_df.columns if 'locations.choices' in col]
+locations_IM_df = IM_service_request_df[["Key"]+list_columns_IM]
+
+# melting locations_IM_df
+locations_IM_df = pd.melt(locations_IM_df, id_vars =['Key'], value_vars =list_columns_IM, var_name ='locations', value_name ='province')
+
+# locations in capacity_building_df
+capacity_building_df["locations.choices0"]= ['Cabo Delgado', "Maputo", "Maputo"]
+capacity_building_df["locations.choices1"]= [None, "Cabo Delgado", "Cabo Delgado"]
+capacity_building_df["locations.choices2"]= [None, None, "Nampula"]
+capacity_building_df["locations.choices3"]= [None, None, "Niassa"]
+capacity_building_df["locations.choices4"]= [None, None, "Zambezia"]
+capacity_building_df["locations.choices5"]= [None, None, "Sofala"]
+list_columns_CB= [col for col in capacity_building_df.columns if 'locations.choices' in col]
+locations_CB_df= capacity_building_df[["Key"]+list_columns_CB]
+
+# melting locations_CB_df
+locations_CB_df = pd.melt(locations_CB_df, id_vars =['Key'], value_vars =list_columns_CB, var_name ='locations', value_name ='province')
+
+# Concatinating locations_IM_df and locations_CB_df
+locations_df = pd.concat([locations_IM_df, locations_CB_df], ignore_index=True)
+
+# Concatinating locations_df and df_issues
+df_issues_locations = pd.merge(locations_df, df_issues, on='Key', how='outer')
+
+# Applying groupby on provinve
+df_issues_locations = df_issues_locations.groupby(["province","year"] )["Key"].count().reset_index()
+df_issues_locations = df_issues_locations.sort_values(by="Key", ascending=False)#.head(10)
+df_issues_locations = df_issues_locations[df_issues_locations["province"]!="Other..."]
+
+#requested provinces/locations must this request cover
+df_issues_locations.rename(columns={"Key": "Total requested number"}, inplace=True)
+
+# # Concatinating locations_df and df_issues
+# df_issues_locations = pd.merge(locations_df, df_issues, on='Key', how='outer')
+
+# Creating products dataframe.
+# products in IM_service_request_df
+products_columns_IM= [col for col in IM_service_request_df.columns if 'products.choices' in col]
+products_IM_df = IM_service_request_df[["Key"]+products_columns_IM]
+
+# melting products_IM_df
+products_IM_df = pd.melt(products_IM_df, id_vars =['Key'], value_vars =products_columns_IM, var_name ='products.choices', value_name ='products')
+
+# products in capacity_building_df
+products_columns_CB= [col for col in capacity_building_df.columns if 'requirements.choices' in col]
+products_CB_df= capacity_building_df[["Key"]+products_columns_CB]
+
+# melting locations_CB_df
+products_CB_df = pd.melt(products_CB_df, id_vars =['Key'], value_vars = products_columns_CB, var_name ='products.choices', value_name ='products')
+
+# Concatinating products_IM_df and products_CB_df
+products_df = pd.concat([products_IM_df, products_CB_df], ignore_index=True)
+
+#print(products_df)
+
+# Concatinating products_df and df_issues
+df_issues_products = pd.merge(products_df, df_issues, on='Key', how='outer')
+#print(df_issues_products)
+
+# Applying groupby on products
+df_issues_products = df_issues_products.groupby(["products","year"] )["Key"].count().reset_index()
+df_issues_products = df_issues_products.sort_values(by="Key", ascending=False)#.head(10)
+
+#requested products/training must this request cover
+df_issues_products.rename(columns={"Key": "Total products"}, inplace=True)
+#print(df_issues_products)
+
+#df_issues_products = df_issues_products[df_issues_locations["province"]!="Other..."]
+
+
+# # Concatinating locations_df and df_issues
+# df_issues_locations = pd.merge(locations_df, df_issues, on='Key', how='outer')
+
+# Creating sectors of work dataframe.
+# products in IM_service_request_df
+sectors_columns_IM= [col for col in IM_service_request_df.columns if 'sector_aor_wg.choices' in col]
+sectors_IM_df = IM_service_request_df[["Key"]+sectors_columns_IM]
+
+# melting products_IM_df
+sectors_IM_df = pd.melt(sectors_IM_df, id_vars =['Key'], value_vars = sectors_columns_IM, var_name ='sector_aor_wg.choices', value_name ='sectors_of_work')
+
+# products in capacity_building_df
+####################################################################################
+####################################################################################
+####################################################################################
+
+
+# Concatinating products_df and df_issues
+df_issues_sectors = pd.merge(sectors_IM_df, df_issues, on='Key', how='outer')
+
+#print(df_issues_sectors)
+# Applying groupby on products
+df_issues_sectors = df_issues_sectors.groupby(["sectors_of_work","year"] )["Key"].count().reset_index()
+df_issues_sectors = df_issues_sectors.sort_values(by="Key", ascending=False)#.head(10)
+
+#requested products/training must this request cover
+df_issues_sectors.rename(columns={"Key": "Total sectors"}, inplace=True)
+#print(df_issues_sectors)
 
 # Lottie configuration and links
 options= dict(loop=True, autoplay=True, rendererSettings=dict(preserveAspectRatio= "xMidYMid slice"))
@@ -183,37 +282,6 @@ app.layout = dbc.Container([
             
         ], width=3),
 
-
-
-    #     # column 2_5
-    #     dbc.Col([
-    #         dbc.Card([
-    #             dbc.CardHeader(Lottie(options=options, width="42%", height="50%", url=url_reactions)),
-    #             dbc.CardBody([
-    #                 html.H6("REACTIONS"),
-    #                 html.H2(id="content_reaction", children=reactions_number)
-
-
-    #             ],style={"textAlign": "center"})
-    #         ]),
-            
-    #     ], width=2),
-
-
-    #     # column 2_6
-    #     dbc.Col([
-    #         dbc.Card([
-    #             dbc.CardHeader(Lottie(options=options, width="42%", height="50%", url=url_adsv_clicked)),
-    #             dbc.CardBody([
-    #                 html.H6("ADS CLICKED"),
-    #                 html.H2(id="content_click", children=ads_clicked_number)
-
-
-    #             ],style={"textAlign": "center"})
-    #         ]),
-            
-    #     ], width=2),
-
     ], className='mb-3'),
 
     # defining the third row
@@ -222,20 +290,41 @@ app.layout = dbc.Container([
             dbc.Card([
                 dbc.CardBody([
                     dcc.Graph(id="line_chart", figure={})
-
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=7),
+        ], width=6),
 
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    dcc.Graph(id="horizontal_bar_chart", figure={})
+                    dcc.Graph(id="locations_bar_chart", figure={})
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=5)
+        ], width=6)
     ], className='mb-3'),
+
+        # defining the fourth row
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    dcc.Graph(id="status_chart", figure={})
+
+                ])
+            ], ), #className="border-0 bg-transparent"
+        ], width=5),
+
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    dcc.Graph(id="products_chart", figure={})
+
+                ])
+            ], ), #className="border-0 bg-transparent"
+        ], width=7)
+    ], className='mb-3'),
+
 
     # defining the fourth row
     dbc.Row([
@@ -262,12 +351,12 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    dcc.Graph(id="word_cloud", figure={})
+                    dcc.Graph(id="sector_chart", figure={})
 
                 ])
             ], ), #className="border-0 bg-transparent"
         ], width=4)
-    ], className='mb-3')
+    ], className='mb-3'),
 
 
 ], fluid= False)
@@ -339,11 +428,43 @@ def update_line_chart(date_range):
     line_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
     return line_chart
+
+
+# tbd chart *******************************************************************
+@app.callback(
+    Output("locations_bar_chart", "figure"),
+    Input("date-range-slider", "value")
+)
+
+def update_vertical_bar_chart(date_range):
+
+    # Picking the years from the date slicer
+    start_date = dt.fromtimestamp(date_range[0]).year
+    end_date = dt.fromtimestamp(date_range[1]).year
+
+    # coping the original dataframes
+    df_reactions_copy = df_issues_locations.copy()
+    df_reactions_copy["percentage"] = round(df_reactions_copy["Total requested number"] / requests_number * 100,1)
+
+    # filtering the dataframe using the picked years from the date slicer
+    df_reactions_copy = df_reactions_copy[(df_reactions_copy["year"] >= start_date) & (df_reactions_copy["year"] <= end_date)]
+
+    # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    # df_reactions_copy.rename(columns={"ID": "Total requested", "Summary": "Service requested"}, inplace=True)
+
+
+    bar_chart= px.bar(df_reactions_copy, x="province", y="percentage", text="percentage", title="Provinces impacted by the requested service", template="ggplot2")
+    bar_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=12, color="black"))
+    bar_chart.update_layout(title_x=0.5, xaxis_title="Provinces", yaxis_title="Pecentage(%)", font=dict(family="Arial", size=11, color="black"))
+    bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
+    bar_chart.update_traces(marker_color="blue", marker_line_color="blue", marker_line_width=1.5, opacity=0.6)
+
+    return bar_chart
     
 
     # bar chart *******************************************************************
 @app.callback(
-    Output("horizontal_bar_chart", "figure"),
+    Output("status_chart", "figure"),
     Input("date-range-slider", "value")    
 )
 
@@ -360,7 +481,7 @@ def update_horizontal_bar_chart(date_range):
     df_connections_copy = df_connections_copy[(df_connections_copy["year"] >= start_date) & (df_connections_copy["year"] <= end_date)]
 
     df_companies = df_connections_copy.groupby(["Status"])["ID"].count().reset_index()
-    df_companies = df_companies.sort_values(by="Status", ascending=False).head(10)
+    df_companies = df_companies.sort_values(by="ID", ascending=True)
     df_companies.rename(columns={"ID": "Total requested"}, inplace=True)
     
     bar_chart= px.bar(df_companies, x="Total requested", y="Status", text="Total requested", title="Total requets by status", template="ggplot2", orientation="h")
@@ -369,6 +490,40 @@ def update_horizontal_bar_chart(date_range):
     bar_chart.update_traces(marker_color="blue", marker_line_color="blue", marker_line_width=1.5, opacity=0.6)
 
     return bar_chart
+
+
+
+# tbd chart *******************************************************************
+@app.callback(
+    Output("products_chart", "figure"),
+    Input("date-range-slider", "value")
+)
+
+def update_products_chart(date_range):
+
+    # Picking the years from the date slicer
+    start_date = dt.fromtimestamp(date_range[0]).year
+    end_date = dt.fromtimestamp(date_range[1]).year
+
+    # coping the original dataframes
+    df_products_copy = df_issues_products.copy()
+    df_products_copy["percentage"] = round(df_products_copy["Total products"] / requests_number * 100,1)
+
+    # filtering the dataframe using the picked years from the date slicer
+    df_products_copy = df_products_copy[(df_products_copy["year"] >= start_date) & (df_products_copy["year"] <= end_date)]
+
+    # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    df_products_copy.rename(columns={"Total products": "Total requested"}, inplace=True)
+
+
+    bar_chart= px.bar(df_products_copy, x="products", y="Total requested", text="Total requested", title="Products requested", template="ggplot2")
+    bar_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=12, color="black"))
+    bar_chart.update_layout(title_x=0.5, xaxis_title="Products", yaxis_title="Number of requested products", font=dict(family="Arial", size=11, color="black"))
+    bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
+    bar_chart.update_traces(marker_color="blue", marker_line_color="blue", marker_line_width=1.5, opacity=0.6)
+
+    return bar_chart
+
 
 # tbd chart *******************************************************************
 @app.callback(
@@ -394,7 +549,7 @@ def update_vertical_bar_chart(date_range):
 
     bar_chart= px.bar(df_reactions_copy, x="Service requested", y="Total requested", text="Total requested", title="Total service requested by type", template="ggplot2")
     bar_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=12, color="black"))
-    bar_chart.update_layout(title_x=0.5, xaxis_title="Service requested", yaxis_title="Total requested", font=dict(family="Arial", size=11, color="black"))
+    bar_chart.update_layout(title_x=0.5, xaxis_title="Service requested", yaxis_title="Number of requests", font=dict(family="Arial", size=11, color="black"))
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
     bar_chart.update_traces(marker_color="blue", marker_line_color="blue", marker_line_width=1.5, opacity=0.6)
 
@@ -419,16 +574,48 @@ def update_pie_chart(date_range):
     # filtering the dataframe using the picked years from the date slicer df_issues_agency_type_copy
     df_issues_agency_type_copy = df_issues_agency_type_copy[(df_issues_agency_type_copy["year"] >= start_date) & (df_issues_agency_type_copy["year"] <= end_date)]
 
-    df_issues_agency_type_copy = df_issues_agency_type_copy.groupby(["agency_type.label"] )["Key"].count().reset_index()
+    df_issues_agency_type_copy = df_issues_agency_type_copy.groupby(['agency_type.choices0'] )["Key"].count().reset_index()
     #print(df_issues_agency_type_copy)
     
-    pie_chart = px.pie(names=df_issues_agency_type_copy["agency_type.label"], values = df_issues_agency_type_copy["Key"], title="Total type of agency", template="ggplot2")
+    pie_chart = px.pie(names=df_issues_agency_type_copy['agency_type.choices0'], values = df_issues_agency_type_copy["Key"], title="Total type of agency", template="ggplot2")
     pie_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=11, color="black"))
     pie_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
     pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",   x=0.9))
     pie_chart.update_traces(marker_colors=[  "blue", "red"])
     return pie_chart
     
+
+# tbd chart *******************************************************************
+@app.callback(
+    Output("sector_chart", "figure"),
+    Input("date-range-slider", "value")
+)
+
+def update_products_chart(date_range):
+
+    # Picking the years from the date slicer
+    start_date = dt.fromtimestamp(date_range[0]).year
+    end_date = dt.fromtimestamp(date_range[1]).year
+
+    # coping the original dataframes
+    df_issues_sectors_copy = df_issues_sectors.copy()
+    df_issues_sectors_copy["percentage"] = round(df_issues_sectors_copy["Total sectors"] / requests_number * 100,1)
+
+    # filtering the dataframe using the picked years from the date slicer
+    df_issues_sectors_copy = df_issues_sectors_copy[(df_issues_sectors_copy["year"] >= start_date) & (df_issues_sectors_copy["year"] <= end_date)]
+
+    # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    df_issues_sectors_copy.rename(columns={"Total sectors": "Total agencies"}, inplace=True)
+
+
+    bar_chart= px.bar(df_issues_sectors_copy, x="sectors_of_work", y="Total agencies", text="Total agencies", title="Distribution of agency work sectors", template="ggplot2")
+    bar_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=12, color="black"))
+    bar_chart.update_layout(title_x=0.5, xaxis_title="Sectors", yaxis_title="Number of agency", font=dict(family="Arial", size=11, color="black"))
+    bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
+    bar_chart.update_traces(marker_color="blue", marker_line_color="blue", marker_line_width=1.5, opacity=0.6)
+
+    return bar_chart
+
 
 # # Word Cloud *******************************************************************
 # @app.callback(
