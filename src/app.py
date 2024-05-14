@@ -11,7 +11,7 @@ import plotly.express as px
 
 # creating a dash application
 app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
-#server = app.server
+server = app.server
 
 
 # import data from csv sheets **********************************************************
