@@ -218,10 +218,10 @@ app.layout = dbc.Container([
         # column with card 1_2
         dbc.Col([
             dbc.Card([
-                dbc.CardImg(src='/assets/admin-ajax_usaid_immap.jpg', style={'height':'70%','width':'70%'}, className = 'align-self-center'),
-                # dbc.CardLink("iMMAP inc", target="_blank",
-                #                  href="https://www.youtube.com/channel/UCEeAvhcsyrPKafvsGHmfRPQ"
-                #     ),
+                dbc.CardImg(src='/assets/USAID-iMMAP-Logo.png', style={'height':'70%','width':'70%'}, className = 'align-self-center'),
+                dbc.CardLink("iMMAP Moz catalog", target="_blank",
+                                 href="https://immapmoz.org/catalog/"
+                    ),
             ],style = {"textAlign": "left"}, className="mb-2 border-0 bg-transparent"),
 
         ], width=7),
@@ -264,7 +264,7 @@ app.layout = dbc.Container([
 						html.H4(id ="content_connections", children=requests_number),
                         html.P("Total requests") 
                         
-                    ], style={"textAlign": "center", 'height':'70px', })
+                    ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
 
                 ]),
             
@@ -277,7 +277,7 @@ app.layout = dbc.Container([
                 dbc.CardBody([
 					html.H4(id="content_invites_sen", children=organizations_assisted_number),
                     html.P("Organizations assisted"),
-                ], style={"textAlign": "center", 'height':'70px', })
+                ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
         ], width=3),
@@ -289,7 +289,7 @@ app.layout = dbc.Container([
                 dbc.CardBody([
 					html.H4(id="content_companies", children=requests_closed),
                     html.P("Resolved requests"),
-                ], style={"textAlign": "center", 'height':'70px', })
+                ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
         ], width=3),
@@ -300,8 +300,8 @@ app.layout = dbc.Container([
                 dbc.CardHeader(dbc.CardImg(src='/assets/All-Icons-OL_dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "left"}, className = 'align-self-center')),
                 dbc.CardBody([
 					html.H4(id="content_invites_rec", children=requests_opened),
-                    html.P("Unresolved requests"),
-                ],style={"textAlign": "center", 'height':'70px', })
+                    html.P("In process"),
+                ],style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
         ], width=3),
@@ -448,7 +448,7 @@ def update_line_chart(date_range):
 
     # building the bar chart
     line_chart = px.line(df_month, x="month_abv", y="Total requested", text="Total requested", title="Total requests by month", template="ggplot2")
-    line_chart.update_traces(mode="markers+lines+text", fill="tozeroy", line=dict(color="#be2126"))
+    line_chart.update_traces(mode="markers+lines+text",fill="tozeroy", line=dict(color="#be2126"))#
     # line_chart.update_layout(title_x=0.5, xaxis_title="Month", yaxis_title="Total requests", font=dict(family="Arial", size=11, color="black"))
     
     # update the position or align of the graphic
@@ -459,21 +459,26 @@ def update_line_chart(date_range):
     line_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
-    line_chart.update_xaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
+    line_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
     line_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='#bcbec0')
 
     # Update title, color for xaxis and yaxis.
-    line_chart.update_layout(xaxis_title="Month", yaxis_title="Number of requests", font=dict(family='Open Sans', size=10, color="black"))
+    line_chart.update_layout(xaxis_title="Month", yaxis_title="Number of requests", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    line_chart.update_xaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    line_chart.update_xaxes(tickangle=0, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    line_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    line_chart.update_yaxes(ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
     line_chart.update_layout(title=dict(text="<b>Provinces impacted by the requested service</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
+    
+    line_chart.update_layout(barmode='stack')
+
+    # Update hover template
+    line_chart.update_traces(hovertemplate="In %{x} iMMAP Moz received %{y} requests",)
 
     return line_chart
 
@@ -507,30 +512,32 @@ def update_vertical_bar_chart(date_range):
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
     
     # color of the graphic 
-    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=0.6)
+    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1, opacity=1)
     
     # Change background color 
     bar_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
-    bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
-    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='#bcbec0')
+    bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
+    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Provinces", yaxis_title="Percentage(%)", font=dict(family='Open Sans', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Provinces",  yaxis_title="Percentage(%)", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_xaxes(tickangle=90, ticklen=0, showline=True, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickangle=90, ticklen=0, showticklabels=False, tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    bar_chart.update_layout(title=dict(text="<b>Provinces impacted by the requested service</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+    bar_chart.update_layout(title=dict(text="<b>Province impacted by the requested service</b>",\
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
-    bar_chart.update_traces( textposition='inside', hovertemplate="%{y}% of the requests have impact in %{x}",)
+    bar_chart.update_traces( textposition='inside', hovertemplate="%{y}% of the requests have impacted %{x}",)
+
+    #bar_chart.update_layout(margin=dict(l=0, r=0, t=0, b=0)),
 
     return bar_chart
     
@@ -568,33 +575,35 @@ def update_horizontal_bar_chart(date_range):
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
     # color of the graphic 
-    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=0.6)
+    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=1)
     
     # Change background color 
     bar_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
-    bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
+    bar_chart.update_xaxes(showline=False, linewidth=1, linecolor='black', gridcolor='white')
     bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Number of requests", yaxis_title="Status", font=dict(family='Open Sans', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Number of requests", yaxis_title="Status", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_xaxes(tickangle=0, ticklen=0, showticklabels=True, tickfont=dict(color='white', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickangle=0, ticklen=0,  tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
     bar_chart.update_layout(title=dict(text="<b>Total requets by status</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
     bar_chart.update_traces( textposition='inside', hovertemplate="%{x} request(s) is(are) in <b>%{y}</b> situation",)
+
+    bar_chart.update_layout(barmode='stack')
 
     return bar_chart
 
@@ -620,8 +629,19 @@ def update_products_chart(date_range):
     # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
     df_products_copy.rename(columns={"Total products": "Total requested"}, inplace=True)
 
+    df_products_copy["products"]= ["Surveys" if v == 'Surveys (XLS Form, Kobo, ODK, etc.)' \
+							  else 'Training' if v=='Training' else 'Assessment' if v=='Assessment'\
+                              else 'Data Analysis' if v=='Data Analysis' else 'Interactive Dashboard' if v=='Interactive Dashboard - Including Maps'\
+                              else 'Maps' if v=='Maps' else 'Training Materials' if v=='Training Materials'\
+                              else 'Data Management' if v=='Data Management' else 'Geoinformatics' if v=='Geoinformatics'\
+                              else 'Information System Development' if v=='Information System Development' else 'Monitoring and Evaluation' if v=='Monitoring and Evaluation (Third Party Monitoring)'\
+                              else 'Reports' if v=='Reports' else 'Training Reports' if v=='Training Reports'\
+                              else 'Web Application/Website' if v=='Web Application/Website'\
+							  else None\
+							  for v in list(df_products_copy["products"])]
+
     # breaks string values if string is longer than 8 chr
-    df_products_copy["products"] = df_products_copy["products"].apply(insert_break_after_40)
+    df_products_copy["products"] = df_products_copy["products"].apply(insert_break_after_2)
 
     # building the bar chart
     bar_chart= px.bar(df_products_copy, x="products", y="Total requested", text="Total requested", template="ggplot2")
@@ -630,31 +650,30 @@ def update_products_chart(date_range):
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
     # color of the graphic 
-    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=0.6)
+    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=1)
     
     # Change background color 
     bar_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
     bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
-    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='#bcbec0')
+    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Products", yaxis_title="Number of products", font=dict(family='Open Sans', size=10, color="black"))
-
+    bar_chart.update_layout(xaxis_title="Products", yaxis_title="Number of products", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=90, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_xaxes(tickangle=90, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickangle=0, ticklen=0, showticklabels=False, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
     bar_chart.update_layout(title=dict(text="<b>Products requested</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
     bar_chart.update_traces( textposition='inside', hovertemplate="%{x} have <b>%{y}</b> request(s)",)
@@ -690,30 +709,30 @@ def update_vertical_bar_chart(date_range):
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
     # color of the graphic 
-    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=0.6)
+    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=1)
     
     # Change background color 
     bar_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
     bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
-    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='#bcbec0')
+    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Services", yaxis_title="Number of requests", font=dict(family='Open Sans', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Services", yaxis_title="Number of requests", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_xaxes(tickangle=0, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickangle=0, ticklen=0, showticklabels=False, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
     bar_chart.update_layout(title=dict(text="<b>Total service requested by type</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
     bar_chart.update_traces( textposition='inside', hovertemplate="%{x} have <b>%{y}</b> requests",)
@@ -739,15 +758,28 @@ def update_pie_chart(date_range):
     # filtering the dataframe using the picked years from the date slicer df_issues_agency_type_copy
     df_issues_agency_type_copy = df_issues_agency_type_copy[(df_issues_agency_type_copy["year"] >= start_date) & (df_issues_agency_type_copy["year"] <= end_date)]
 
+    # grouping by agency type
     df_issues_agency_type_copy = df_issues_agency_type_copy.groupby(['agency_type.choices0'] )["Key"].count().reset_index()
-    #print(df_issues_agency_type_copy)
     
-    pie_chart = px.pie(names=df_issues_agency_type_copy['agency_type.choices0'], values = df_issues_agency_type_copy["Key"], title="Total type of agency", template="ggplot2")
-    pie_chart.update_layout(title_x=0.5, font=dict(family="Arial", size=11, color="black"))
+    # building the bar chart and the chosing the color of the graphic
+    pie_chart = px.pie(names=df_issues_agency_type_copy['agency_type.choices0'], values = df_issues_agency_type_copy["Key"],\
+                       template="ggplot2", color_discrete_sequence=px.colors.sequential.Reds_r)
+
+    # update the position or align of the graphic
     pie_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
-    pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",   x=0.9))
-    pie_chart.update_traces(marker_colors=[  "blue", "red"])
+    
+    # update the place where the legend are going to apear
+    pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",  font=dict(color='black', size=10, family='Arial'), x=0.9))
+
+    #pie_chart.update_traces(marker_colors=[  "blue", "red"])
+
+    # Change background color 
     pie_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
+
+    # update title
+    pie_chart.update_layout(title=dict(text="<b>Total agency type</b>",\
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
+    
     return pie_chart
     
 
@@ -774,39 +806,39 @@ def update_products_chart(date_range):
     df_issues_sectors_copy.rename(columns={"Total sectors": "Total agencies"}, inplace=True)
 
     # building the bar chart
-    bar_chart= px.bar(df_issues_sectors_copy, x="sectors_of_work", y="Total agencies", text="Total agencies", title="Distribution of agency work sectors", template="ggplot2")
+    bar_chart= px.bar(df_issues_sectors_copy, x="sectors_of_work", y="Total agencies", text="Total agencies", template="ggplot2")
     
     # update the position or align of the graphic
     bar_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
     # color of the graphic 
-    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=0.6)
+    bar_chart.update_traces(marker_color="#be2126", marker_line_color="#be2126", marker_line_width=1.5, opacity=1)
     
     # Change background color 
     bar_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
     
     # Change grid color and axis colors and xaxis and yaxis title
     bar_chart.update_xaxes(showline=True, linewidth=1, linecolor='black', gridcolor='white')
-    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='#bcbec0')
+    bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Sectors", yaxis_title="Number of agency", font=dict(family='Open Sans', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Sectors", yaxis_title="Number of agency", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_xaxes(tickangle=0, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickangle=0, tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickangle=0, ticklen=0, showticklabels=False, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
-    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Open Sans'))
+    bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
     bar_chart.update_layout(title=dict(text="<b>Distribution of agency work sectors</b>",\
-                                       font=dict(family='Open Sans', size=12, color="black",), yref='paper'), title_x=0,)
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
-    bar_chart.update_traces(textposition='inside', hovertemplate="%{y} are working in have <b>%{x}</b>",)
+    bar_chart.update_traces(textposition='inside', hovertemplate="%{y} agencies are working in have <b>%{x}</b>",)
 
     return bar_chart
 
