@@ -39,6 +39,7 @@ def insert_break_after_2(text):
 agency_type_immap_id_labels_df_2 = pd.read_csv('agency_type_immap_id_labels_df_2.csv', low_memory=False, encoding="iso-8859-1")
 IM_service_request_df = pd.read_csv('IM_service_request_df.csv', low_memory=False, encoding="iso-8859-1")
 capacity_building_df = pd.read_csv('capacity_building_df.csv', low_memory=False, encoding="iso-8859-1")
+coordination_meetings = pd.read_csv('coordination meetings.csv', low_memory=False, encoding="iso-8859-1")
 dfIssues = pd.read_csv('dfIssues.csv', low_memory=False, encoding="iso-8859-1")
 
 # temporary
@@ -51,33 +52,32 @@ df_registration["created_date"] = pd.to_datetime(df_registration["created_date"]
 df_registration = df_registration.sort_values(by="created_date")
 
 # Calculate the timestamps for each year
-start_date = df_registration["created_date"].min()
+start_date = dt(2024, 1, 1)
 end_date = dt.now()
 years_range = range(start_date.year, end_date.year + 1)  # Include the current year
 timestamps = [int(dt(year, 1, 1).timestamp()) for year in years_range]
+
+# Calculate the timestamps for each year
+start_month = df_registration["created_date"].min()
+end_month = dt.now()
+months_range = range(start_date.month, end_date.month + 1)  # Include the current month
+monthstamps = [calendar.month_abbr[month] for month in months_range]
 
 # creating a copy of dfIssues dataframe
 df_issues = dfIssues.copy()
 df_issues["created_date"] = pd.to_datetime(list(df_issues["created_date"]))
 df_issues["month"] = df_issues["created_date"].dt.month
 df_issues["year"] = df_issues["created_date"].dt.year
-df_issues["month"] = df_issues["month"].apply(lambda x: calendar.month_abbr[x])
+df_issues["month_abbr"] = df_issues["month"].apply(lambda x: calendar.month_abbr[x])
 
 # Calculating the number of received requests
 requests_number = len(dfIssues)
 
-# Calculating the number of closed requests
-requests_closed = len(dfIssues[dfIssues["Status"] == "Done"])
+# # Calculating the number of closed requests
+# requests_closed = len(dfIssues[dfIssues["Status"] == "Done"])
 
-# Calculating the number of opened requests
-requests_opened = requests_number-len(dfIssues[dfIssues["Status"] == "Done"])
-
-# Calculating the number of organizations assisted
-# creating a copy of IM_service_request_df and capacity_building_df dataframe
-df_forms_sr = IM_service_request_df.copy()
-df_forms_cb = capacity_building_df.copy()
-list_organizations_assisted = list(df_forms_cb["agency_name.text"].unique()) + list(df_forms_sr["agency_name.text"].unique())
-organizations_assisted_number = len(set(list_organizations_assisted))
+# # Calculating the number of opened requests
+# requests_opened = requests_number-len(dfIssues[dfIssues["Status"] == "Done"])
 
 # Creating agency_type dataframe.
 df_agency_type_sr= IM_service_request_df[["Key",'agency_type.choices0']].copy()
@@ -113,7 +113,7 @@ locations_df = pd.concat([locations_IM_df, locations_CB_df], ignore_index=True)
 df_issues_locations = pd.merge(locations_df, df_issues, on='Key', how='outer')
 
 # Applying groupby on provinve
-df_issues_locations = df_issues_locations.groupby(["province","year"] )["Key"].count().reset_index()
+df_issues_locations = df_issues_locations.groupby(["province", "year", "month", "month_abbr"] )["Key"].count().reset_index()
 df_issues_locations = df_issues_locations.sort_values(by="Key", ascending=False)#.head(10)
 df_issues_locations = df_issues_locations[df_issues_locations["province"]!="Other..."]
 
@@ -141,14 +141,13 @@ products_CB_df = pd.melt(products_CB_df, id_vars =['Key'], value_vars = products
 # Concatinating products_IM_df and products_CB_df
 products_df = pd.concat([products_IM_df, products_CB_df], ignore_index=True)
 
-#print(products_df)
 
 # Concatinating products_df and df_issues
 df_issues_products = pd.merge(products_df, df_issues, on='Key', how='outer')
 #print(df_issues_products)
 
 # Applying groupby on products
-df_issues_products = df_issues_products.groupby(["products","year"] )["Key"].count().reset_index()
+df_issues_products = df_issues_products.groupby(["products", "year", "month", "month_abbr"] )["Key"].count().reset_index()
 df_issues_products = df_issues_products.sort_values(by="Key", ascending=False)#.head(10)
 
 #requested products/training must this request cover
@@ -180,7 +179,7 @@ df_issues_sectors = pd.merge(sectors_IM_df, df_issues, on='Key', how='outer')
 
 #print(df_issues_sectors)
 # Applying groupby on products
-df_issues_sectors = df_issues_sectors.groupby(["sectors_of_work","year"] )["Key"].count().reset_index()
+df_issues_sectors = df_issues_sectors.groupby(["sectors_of_work","year", "month", "month_abbr"] )["Key"].count().reset_index()
 df_issues_sectors = df_issues_sectors.sort_values(by="Key", ascending=False)#.head(10)
 
 #requested products/training must this request cover
@@ -200,58 +199,80 @@ url_reactions = "https://lottie.host/bd42d6a9-8df3-4417-8e12-f226405b5078/tFWFHV
 url_adsv_clicked= "https://lottie.host/b69a8eb1-bf27-4ccc-8c0d-11fcc8f65967/T56YbMD0DY.json"
 
 app.layout = dbc.Container([
+# first row 
+		dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.4vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"double"}),width={'size':13, 'offset':0}),), 
+
+
     # defining the first row
     dbc.Row([
 
-        # # column with card 1_1
-        # dbc.Col([
-        #     dbc.Card([
-        #         dbc.CardImg(src='/assets/linkedin_logo.png', style={'height':'70%','width':'70%'}, className = 'align-self-center'),
-        #         dbc.CardLink("Analysis suported by Moz-DS", target="_blank",
-        #                          href="https://www.youtube.com/channel/UCEeAvhcsyrPKafvsGHmfRPQ"
-        #             ),
-        #     ],style = {"textAlign": "center"}, className="mb-2 border-0 bg-transparent"),
+        # column with card 1_2
+        dbc.Col([
+            dbc.Card([
+                dbc.CardImg(src='/assets/USAID-iMMAP-Logo.png', style={'height':'90%','width':'90%', "float": "center"}, className = 'align-self-right'),
+            ],style = {"textAlign": "left"}, className="mb-0 border-0 bg-transparent"),
 
-        # ], width=3),
-
+        ], className = 'align-self-center',  width=5),
 
         # column with card 1_2
         dbc.Col([
             dbc.Card([
-                dbc.CardImg(src='/assets/USAID-iMMAP-Logo.png', style={'height':'70%','width':'70%'}, className = 'align-self-center'),
-                dbc.CardLink("iMMAP Moz catalog", target="_blank",
-                                 href="https://immapmoz.org/catalog/"
-                    ),
-            ],style = {"textAlign": "left"}, className="mb-2 border-0 bg-transparent"),
-
-        ], width=7),
-
-        # column with card 1_2
-        dbc.Col([
-            dbc.Card([
+                 
+                dbc.CardHeader(["Year filter"],className='text-center', ),
                 dbc.CardBody([
 
-        dcc.RangeSlider(
-        id='date-range-slider',
-        marks={timestamp: str(dt.fromtimestamp(timestamp).year) for timestamp in timestamps},
-        min=timestamps[0],
-        max=timestamps[-1],
-        value=[timestamps[0], timestamps[-1]],
-        step=None,)
+                dcc.RangeSlider(
+                    id='date-range-slider',
+                    marks={timestamp: str(dt.fromtimestamp(timestamp).year) for timestamp in timestamps},
+                    min=timestamps[0],
+                    max=timestamps[-1],
+                    value=[timestamps[0], timestamps[-1]],
+                    step=None,             
+                    className='sliderRed',
+                    dots=True,)
                 ])
-            ],className="mb-2 border-0 bg-transparent" ), #color="white"
+            ],className="mb-0 border-1 bg-transparent" ), #color="white"
 
-        ], width=5),
+        ],style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'}, className = 'align-self-center', width=3),
 
-                # column with card 1_1
-        # dbc.Col([
-        #     dbc.Card([
-        #         dbc.CardImg(src='assets\8. IMOVTAM.jpg', style={'height':'20%','width':'20%'}, className = 'align-self-center'),
-        #         dbc.CardLink("Venâncio Munhangane", target="_blank",
-        #             href="https://www.linkedin.com/in/ven%C3%A2ncio-tobias-a-munhangane-652436161/"),
-        #     ], style = {"textAlign": "center"}, className="mb-2 border-0 bg-transparent align-self-center"),
-        # ], width=2),
-    ], className='mb-3 mt-3'),
+        
+        # column with card 1_2
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader(["Month filter"],className='text-center', ),
+                dbc.CardBody([
+                dcc.RangeSlider(
+                    id='month-range-slider',
+                    marks={month: calendar.month_abbr[month] for month in months_range},
+                    min=months_range[0],
+                    max=months_range[-1],
+                    value=[months_range[0], months_range[-1]],
+                    step=None,
+                    className='sliderRed',
+                    dots=True,
+                    allowCross=True,
+                    updatemode='mouseup', )
+                ])
+            ],className="mb-0 border-1 bg-transparent" ),#), #color="white"
+
+        ], style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'},className = 'align-self-center', width=3),#
+
+
+        
+        # column with card 1_1
+        dbc.Col([
+            dbc.Card([
+                dbc.CardImg(src='/assets/iMMAP_moz.png', style={'height':'100%','width':'100%'}, className = 'align-self-center'),
+                            dbc.CardLink("iMMAP Moz catalog", target="_blank", href="https://immapmoz.org/catalog/"),
+            ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent"),
+
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
+
+    ], className='mb-0'),
+
+
+    # Last row
+dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"dashed"}),width={'size':12, 'offset':0}),), 
 
     # defining the second row
     dbc.Row([
@@ -259,54 +280,71 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Card([
                     #dbc.CardHeader(Lottie(options=options, width="35%", height="35%", url=url_requests)),
-                    dbc.CardHeader(dbc.CardImg(src='/assets/All-Icons-OL_Advise.png', style={'height':'25%','width':'15%', "float": "center"}, className = 'align-self-center')),
+                    dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Advise.png', style={'height':'25%','width':'15%', "float": "center"})],  className = 'text-center'),
                     dbc.CardBody([
-						html.H4(id ="content_connections", children=requests_number),
+						html.H4(id ="total_requests", children=0),
                         html.P("Total requests") 
                         
                     ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
 
                 ]),
             
-        ], width=3),
+        ], className='m-0', width=2),
 		
-        # column 2_4
-        dbc.Col([
-            dbc.Card([
-                dbc.CardHeader(dbc.CardImg(src='/assets/All-Icons-OL_COUNTRY-OFFICES.png', style={'height':'25%','width':'15%', "float": "left"}, className = 'align-self-center')),
-                dbc.CardBody([
-					html.H4(id="content_invites_sen", children=organizations_assisted_number),
-                    html.P("Organizations assisted"),
-                ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
-            ]),
-            
-        ], width=3),
-
         # column 2_2
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader(dbc.CardImg(src='/assets/All-Icons-OL-41.png', style={'height':'45%','width':'35%', "float": "center"}, className = 'align-self-center')),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL-41.png', style={'height':'45%','width':'35%', "float": "center"})],  className = 'text-center'),
                 dbc.CardBody([
-					html.H4(id="content_companies", children=requests_closed),
+					html.H4(id="resolved_requests", children=0),
                     html.P("Resolved requests"),
                 ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
-        ], width=3),
+        ], className='m-0', width=2),
 
         # column 2_3
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader(dbc.CardImg(src='/assets/All-Icons-OL_dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "left"}, className = 'align-self-center')),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "center"})], className='text-center'),
                 dbc.CardBody([
-					html.H4(id="content_invites_rec", children=requests_opened),
+					html.H4(id="unresolved_requests", children=0),
                     html.P("In process"),
                 ],style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
+            ],  ),
+            
+        ], className='text-center m-0', width=2),
+
+        # column 2_4
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_COUNTRY-OFFICES.png', style={'height':'25%','width':'15%', "float": "center"})],  className = 'text-center'),
+                dbc.CardBody([
+					html.H4(id="organizations_assisted", children=0),
+                    html.P("Organizations assisted"),
+                ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
-        ], width=3),
+        ], className='m-0', width=2),
 
-    ], justify="center", className='mb-2'),
+        # column 2_3
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Outreach-And-Dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "center"})], className = 'text-center' ),
+                dbc.CardBody([
+					html.H4(id="coordination_meetings", children=0),
+                    html.P("Coordination meetings"),
+                ],style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
+            ],  ),
+            
+        ], className='m-0', width=2),
+
+
+    ], justify="center", className='mb-0'),
+
+    # Last row
+dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"dashed"}),width={'size':12, 'offset':0}),), 
+
 
     # defining the third row
     dbc.Row([
@@ -380,8 +418,69 @@ app.layout = dbc.Container([
                 ])
             ], ), #className="border-0 bg-transparent"
         ], width=4)
-    ], className='mb-3'),
+    ], className='mb-1'),
 
+# Last row
+dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.4vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"double"}), className="mb-0", width={'size':12, 'offset':0}),),
+
+
+    # defining the first row
+    dbc.Row([
+
+        # column with card 1_2
+        dbc.Col([
+            dbc.Card([
+                dbc.CardImg(src='/assets/network.png', style={'height':'30%','width':'30%', "float": "right"}, className = 'align-self-center'),
+            ],style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent"),
+
+        ], className = 'align-self-center',  width=1),
+
+
+        # column with card 1_2
+        dbc.Col([
+            dbc.Card([
+                dbc.CardLink("www.immap.org ", target="_blank", href="https://www.immap.org"),
+            ],style={'height':'100%','width':'100%', "float": "center", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
+
+        ], style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
+
+
+        
+        # column with card 1_1
+        dbc.Col([
+            dbc.Card([
+                dbc.CardImg(src='/assets/mail_ico.png', style={'height':'20%','width':'20%'}, className = 'align-self-center'),
+            ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent"),
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
+
+
+        # column with card 1_1
+        dbc.Col([
+            dbc.Card([
+
+            dbc.CardLink("rep-mozambique@immap.org", target="_blank", href="rep-mozambique@immap.org"),
+            ],style={'height':'100%','width':'100%', "float": "center", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
+
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
+
+
+    # column with card 1_1
+        dbc.Col([
+            dbc.Card([
+            dbc.CardImg(src='/assets/positionicon.png', style={'height':'10%','width':'10%'}, className = 'align-self-center'),
+            ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent"),
+
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
+
+
+    # column with card 1_1
+        dbc.Col([
+            dbc.Card([
+            dbc.CardLink("Maputo, Mozambique", target="_blank", href="https://www.immap.org"),]
+            ,style={'height':'100%','width':'100%', "float": "left", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
+
+    ], className='mb-1'),
 
 ], fluid= False)
 
@@ -389,13 +488,16 @@ app.layout = dbc.Container([
 
 # Updating the 6 number cards
 @app.callback(
-    Output("content_connections", "children"),
-    Output("content_companies", "children"),
-    Output("content_invites_rec", "children"),
-    Input("date-range-slider", "value")
+    Output("total_requests", "children"),
+    Output("resolved_requests", "children"),
+    Output("unresolved_requests", "children"),
+    Output("organizations_assisted", "children"),
+    Output("coordination_meetings", "children"),
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value")
 )
 
-def update_cards(date_range):
+def update_cards(date_range, month_range):
 
     # coping the original dataframes
     df_connections_copy = df_issues.copy()
@@ -404,50 +506,73 @@ def update_cards(date_range):
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
+
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
 	
    
     # Filtering the Connections dataframe
     df_connections_copy = df_connections_copy[(df_connections_copy["year"] >= start_date) & (df_connections_copy["year"] <= end_date)]
+    df_connections_copy = df_connections_copy[(df_connections_copy["month"] >= start_month) & (df_connections_copy["month"] <= end_month)]
     requests_number = len(df_connections_copy)
 
     # Companies dataframe
-    requests_closed = len(dfIssues[dfIssues["Status"] == "Done"])
+    requests_closed = len(df_connections_copy[df_connections_copy["Status"] == "Done"])
 	
-
     # Invitations dataframe
     requests_opened = requests_number - requests_closed
 
+    # Calculating the number of organizations assisted
+    # creating a copy of IM_service_request_df and capacity_building_df dataframe
+    df_forms_sr= pd.merge(IM_service_request_df, df_connections_copy[['Key']], on='Key', how='inner')
+    df_forms_cb= pd.merge(capacity_building_df, df_connections_copy[['Key']], on='Key', how='inner')
+    list_organizations_assisted = list(df_forms_cb["agency_name.text"].unique()) + list(df_forms_sr["agency_name.text"].unique())
+    organizations_assisted = len(set(list_organizations_assisted))
+
+    # Copying the coordination meetings dataframe
+    coordination_meetings_copy =coordination_meetings.copy()
+    
+    # Filtering the Connections dataframe
+    coordination_meetings_copy = coordination_meetings_copy[(coordination_meetings_copy["year"] >= start_date) & (coordination_meetings_copy["year"] <= end_date)]
+    coordination_meetings_copy = coordination_meetings_copy[(coordination_meetings_copy["month"] >= start_month) & (coordination_meetings_copy["month"] <= end_month)]
+
+    # Calculating the number of coordination meetings
+    coordination_meetings_number = coordination_meetings_copy["number of meetings"].sum()
+
     #print(list(df_connections_copy.columns))
-    return requests_number, requests_closed, requests_opened, #sent_invetations_number, reactions_number, ads_clicked_number
+    return requests_number, requests_closed, requests_opened, organizations_assisted, coordination_meetings_number
 
 
 # line chart *******************************************************************
 @app.callback(
     Output("line_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value")
 )
 
-def update_line_chart(date_range):
+def update_line_chart(date_range, month_range ):
 
-        # Picking the years from the date slicer
+    # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
-	
+
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_connections_copy = df_issues.copy()
 
-    # filtering the dataframe using the picked years from the date slicer
+    # filtering the dataframe using the picked years and months from the date slicer
     df_connections_copy = df_connections_copy[(df_connections_copy["year"] >= start_date) & (df_connections_copy["year"] <= end_date)]
-    df_connections_copy["created_date"] = pd.to_datetime(df_connections_copy["created_date"])
-    df_connections_copy["month"] = df_connections_copy["created_date"].dt.month
-    df_connections_copy["month_abv"] = df_connections_copy["month"].apply(lambda x: calendar.month_abbr[x])
-    df_connections_copy["year"] = df_connections_copy["created_date"].dt.year
+    df_connections_copy = df_connections_copy[(df_connections_copy["month"] >= start_month) & (df_connections_copy["month"] <= end_month)]
 
-    df_month= df_connections_copy.groupby(["month","month_abv"] )["ID"].count().reset_index()
+    df_month= df_connections_copy.groupby(["month","month_abbr"] )["ID"].count().reset_index()
     df_month.rename(columns={"ID": "Total requested"}, inplace=True)
 
     # building the bar chart
-    line_chart = px.line(df_month, x="month_abv", y="Total requested", text="Total requested", title="Total requests by month", template="ggplot2")
+    line_chart = px.line(df_month, x="month_abbr", y="Total requested", text="Total requested", title="Total requests by month", template="ggplot2")
     line_chart.update_traces(mode="markers+lines+text",fill="tozeroy", line=dict(color="#be2126"))#
     # line_chart.update_layout(title_x=0.5, xaxis_title="Month", yaxis_title="Total requests", font=dict(family="Arial", size=11, color="black"))
     
@@ -472,7 +597,7 @@ def update_line_chart(date_range):
     line_chart.update_yaxes(ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    line_chart.update_layout(title=dict(text="<b>Provinces impacted by the requested service</b>",\
+    line_chart.update_layout(title=dict(text="<b>Total requests by month</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
     
     line_chart.update_layout(barmode='stack')
@@ -486,21 +611,33 @@ def update_line_chart(date_range):
 # tbd chart *******************************************************************
 @app.callback(
     Output("locations_bar_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value")
+
 )
 
-def update_vertical_bar_chart(date_range):
+def update_vertical_bar_chart(date_range, month_range):
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
 
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_reactions_copy = df_issues_locations.copy()
-    df_reactions_copy["percentage"] = round(df_reactions_copy["Total requested number"] / requests_number * 100,1)
-
-    # filtering the dataframe using the picked years from the date slicer
+    
+    # filtering the dataframe using the picked years and months from the date slicer
     df_reactions_copy = df_reactions_copy[(df_reactions_copy["year"] >= start_date) & (df_reactions_copy["year"] <= end_date)]
+    df_reactions_copy = df_reactions_copy[(df_reactions_copy["month"] >= start_month) & (df_reactions_copy["month"] <= end_month)]
+
+    # Applying group by province
+    df_reactions_copy= df_reactions_copy.groupby(["province"] )["Total requested number"].sum().reset_index().sort_values(by="Total requested number", ascending=False)
+
+    # calculating percentage impacted by province
+    df_reactions_copy["percentage"] = round(df_reactions_copy["Total requested number"] / requests_number * 100,1)
 
     # breaks string values if string is longer than 8 chr
     df_reactions_copy["province"] = df_reactions_copy["province"].apply(insert_break_after_2)
@@ -537,31 +674,35 @@ def update_vertical_bar_chart(date_range):
     # Update hover template
     bar_chart.update_traces( textposition='inside', hovertemplate="%{y}% of the requests have impacted %{x}",)
 
-    #bar_chart.update_layout(margin=dict(l=0, r=0, t=0, b=0)),
-
     return bar_chart
     
 
     # bar chart *******************************************************************
 @app.callback(
     Output("status_chart", "figure"),
-    Input("date-range-slider", "value")    
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value")    
 )
 
-def update_horizontal_bar_chart(date_range):
+def update_horizontal_bar_chart(date_range, month_range):
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
 
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_connections_copy = df_issues.copy()
 
-    # filtering the dataframe using the picked years from the date slicer
+    # filtering the dataframe using the picked years and months from the date slicer
     df_connections_copy = df_connections_copy[(df_connections_copy["year"] >= start_date) & (df_connections_copy["year"] <= end_date)]
+    df_connections_copy = df_connections_copy[(df_connections_copy["month"] >= start_month) & (df_connections_copy["month"] <= end_month)]
 
-    df_companies = df_connections_copy.groupby(["Status"])["ID"].count().reset_index()
-    df_companies = df_companies.sort_values(by="ID", ascending=True)
+    # Applying group by
+    df_companies = df_connections_copy.groupby(["Status"])["ID"].count().reset_index().sort_values(by="ID", ascending=True)
     df_companies.rename(columns={"ID": "Total requested"}, inplace=True)
     
     # breaks string values if string is longer than 8 chr
@@ -610,23 +751,34 @@ def update_horizontal_bar_chart(date_range):
 # tbd chart *******************************************************************
 @app.callback(
     Output("products_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value") 
 )
 
-def update_products_chart(date_range):
+def update_products_chart(date_range, month_range):
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
 
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_products_copy = df_issues_products.copy()
-    df_products_copy["percentage"] = round(df_products_copy["Total products"] / requests_number * 100,1)
-
+    
     # filtering the dataframe using the picked years from the date slicer
     df_products_copy = df_products_copy[(df_products_copy["year"] >= start_date) & (df_products_copy["year"] <= end_date)]
+    df_products_copy = df_products_copy[(df_products_copy["month"] >= start_month) & (df_products_copy["month"] <= end_month)]
 
-    # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    # Applying group by province
+    df_products_copy= df_products_copy.groupby(["products"] )["Total products"].sum().reset_index()
+
+    # calculating percentage of the products requested
+    df_products_copy["percentage"] = round(df_products_copy["Total products"] / requests_number * 100,1)
+
+    df_products_copy = df_products_copy.sort_values(by="Total products", ascending=False)
     df_products_copy.rename(columns={"Total products": "Total requested"}, inplace=True)
 
     df_products_copy["products"]= ["Surveys" if v == 'Surveys (XLS Form, Kobo, ODK, etc.)' \
@@ -684,22 +836,28 @@ def update_products_chart(date_range):
 # tbd chart *******************************************************************
 @app.callback(
     Output("vertical_bar_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value")     
 )
 
-def update_vertical_bar_chart(date_range):
+def update_vertical_bar_chart(date_range, month_range):
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
 
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_reactions_copy = df_issues.copy()
 
-    # filtering the dataframe using the picked years from the date slicer
+    # filtering the dataframe using the picked years and months from the date slicer
     df_reactions_copy = df_reactions_copy[(df_reactions_copy["year"] >= start_date) & (df_reactions_copy["year"] <= end_date)]
+    df_reactions_copy = df_reactions_copy[(df_reactions_copy["month"] >= start_month) & (df_reactions_copy["month"] <= end_month)]
 
-    df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index().sort_values(by="ID", ascending=False)
     df_reactions_copy.rename(columns={"ID": "Total requested", "Summary": "Service requested"}, inplace=True)
 
     # building the bar chart
@@ -743,35 +901,39 @@ def update_vertical_bar_chart(date_range):
 # # Pie chart *******************************************************************
 @app.callback(
     Output("pie_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value") 
 )
 
-def update_pie_chart(date_range):
+def update_pie_chart(date_range, month_range):
 	
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
+
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
 	
     df_issues_agency_type_copy= df_issues_agency_type.copy()
 	
     # filtering the dataframe using the picked years from the date slicer df_issues_agency_type_copy
     df_issues_agency_type_copy = df_issues_agency_type_copy[(df_issues_agency_type_copy["year"] >= start_date) & (df_issues_agency_type_copy["year"] <= end_date)]
+    df_issues_agency_type_copy = df_issues_agency_type_copy[(df_issues_agency_type_copy["month"] >= start_month) & (df_issues_agency_type_copy["month"] <= end_month)]
 
     # grouping by agency type
-    df_issues_agency_type_copy = df_issues_agency_type_copy.groupby(['agency_type.choices0'] )["Key"].count().reset_index()
+    df_issues_agency_type_copy = df_issues_agency_type_copy.groupby(['agency_type.choices0'] )["Key"].count().reset_index().sort_values(by="Key", ascending=False)
     
     # building the bar chart and the chosing the color of the graphic
     pie_chart = px.pie(names=df_issues_agency_type_copy['agency_type.choices0'], values = df_issues_agency_type_copy["Key"],\
-                       template="ggplot2", color_discrete_sequence=px.colors.sequential.Reds_r)
+                       template="ggplot2", color_discrete_sequence=px.colors.sequential.Reds_r, hole=.5)
 
     # update the position or align of the graphic
     pie_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
     
     # update the place where the legend are going to apear
     pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",  font=dict(color='black', size=10, family='Arial'), x=0.9))
-
-    #pie_chart.update_traces(marker_colors=[  "blue", "red"])
 
     # Change background color 
     pie_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
@@ -780,29 +942,37 @@ def update_pie_chart(date_range):
     pie_chart.update_layout(title=dict(text="<b>Total agency type</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
     
+    # Update hover template
+    pie_chart.update_traces(hovertemplate="%{value} agencies that asked for service" + " are: <b> %{label} </b><br>")
+    
     return pie_chart
     
 
 # tbd chart *******************************************************************
 @app.callback(
     Output("sector_chart", "figure"),
-    Input("date-range-slider", "value")
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value") 
 )
 
-def update_products_chart(date_range):
+def update_products_chart(date_range, month_range):
 
     # Picking the years from the date slicer
     start_date = dt.fromtimestamp(date_range[0]).year
     end_date = dt.fromtimestamp(date_range[1]).year
 
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+
     # coping the original dataframes
     df_issues_sectors_copy = df_issues_sectors.copy()
-    df_issues_sectors_copy["percentage"] = round(df_issues_sectors_copy["Total sectors"] / requests_number * 100,1)
 
-    # filtering the dataframe using the picked years from the date slicer
+     # filtering the dataframe using the picked years from the date slicer
     df_issues_sectors_copy = df_issues_sectors_copy[(df_issues_sectors_copy["year"] >= start_date) & (df_issues_sectors_copy["year"] <= end_date)]
+    df_issues_sectors_copy = df_issues_sectors_copy[(df_issues_sectors_copy["month"] >= start_month) & (df_issues_sectors_copy["month"] <= end_month)]
 
-    # df_reactions_copy = df_reactions_copy.groupby(["Summary"] )["ID"].count().reset_index()
+    df_issues_sectors_copy = df_issues_sectors_copy.groupby(["sectors_of_work"] )["Total sectors"].sum().reset_index().sort_values(by="Total sectors", ascending=False)
     df_issues_sectors_copy.rename(columns={"Total sectors": "Total agencies"}, inplace=True)
 
     # building the bar chart
@@ -838,7 +1008,7 @@ def update_products_chart(date_range):
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
-    bar_chart.update_traces(textposition='inside', hovertemplate="%{y} agencies are working in have <b>%{x}</b>",)
+    bar_chart.update_traces(textposition='inside', hovertemplate="%{y} agencies are working in <b>%{x}</b>",)
 
     return bar_chart
 
