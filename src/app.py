@@ -573,7 +573,9 @@ def update_line_chart(date_range, month_range ):
 
     # building the bar chart
     line_chart = px.line(df_month, x="month_abbr", y="Total requested", text="Total requested", title="Total requests by month", template="ggplot2")
-    line_chart.update_traces(mode="markers+lines+text",fill="tozeroy", line=dict(color="#be2126"))#
+    line_chart.update_traces(mode="markers+lines+text",fill="tozeroy", line=dict(color="#be2126"),\
+                             marker=dict(size=df_month["Total requested"]+10, color="#be2126"))
+    
     # line_chart.update_layout(title_x=0.5, xaxis_title="Month", yaxis_title="Total requests", font=dict(family="Arial", size=11, color="black"))
     
     # update the position or align of the graphic
