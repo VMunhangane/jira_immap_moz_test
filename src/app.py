@@ -10,7 +10,9 @@ import plotly.express as px
 
 
 # creating a dash application
-app = Dash(__name__, external_stylesheets=[dbc.themes.LUX])
+app = Dash(__name__, external_stylesheets=[dbc.themes.LUX], 
+           meta_tags=[{'name': 'viewport',
+                            'content': 'width=device-width, initial-scale=1.0, maximum-scale=1.5, minimum-scale=0.5'}])
 server = app.server
 
 # function that breaks line if string is longer than 8 chr
@@ -212,7 +214,7 @@ app.layout = dbc.Container([
                 dbc.CardImg(src='/assets/USAID-iMMAP-Logo.png', style={'height':'90%','width':'90%', "float": "center"}, className = 'align-self-right'),
             ],style = {"textAlign": "left"}, className="mb-0 border-0 bg-transparent"),
 
-        ], className = 'align-self-center',  width=5),
+        ], className = 'align-self-center',  width=5, xs=10, sm=10, md=5, lg=5, xl=5),
 
         # column with card 1_2
         dbc.Col([
@@ -233,7 +235,8 @@ app.layout = dbc.Container([
                 ])
             ],className="mb-0 border-1 bg-transparent" ), #color="white"
 
-        ],style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'}, className = 'align-self-center', width=3),
+        ],style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'},\
+              className = 'align-self-center', width=3, xs=10, sm=10, md=5, lg=3, xl=3),
 
         
         # column with card 1_2
@@ -255,7 +258,8 @@ app.layout = dbc.Container([
                 ])
             ],className="mb-0 border-1 bg-transparent" ),#), #color="white"
 
-        ], style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'},className = 'align-self-center', width=3),#
+        ], style={'height':'100px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'},\
+            className = 'align-self-center', width=3, xs=10, sm=10, md=5, lg=3, xl=3),#
 
 
         
@@ -264,15 +268,16 @@ app.layout = dbc.Container([
             dbc.Card([
                 dbc.CardImg(src='/assets/iMMAP_moz.png', style={'height':'100%','width':'100%'}, className = 'align-self-center'),
                             dbc.CardLink("iMMAP Moz catalog", target="_blank", href="https://immapmoz.org/catalog/"),
-            ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent"),
+            ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent text-center", ),
 
-        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
+        ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'},\
+              className = 'align-self-center', width=1, xs=3, sm=3, md=3, lg=1, xl=1),
 
     ], className='mb-0'),
 
 
     # Last row
-dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"dashed"}),width={'size':12, 'offset':0}),), 
+    dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderColor": "#6d6e71", "borderStyle":"dashed"}),width={'size':12, 'offset':0}),), 
 
     # defining the second row
     dbc.Row([
@@ -280,7 +285,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
         dbc.Col([
             dbc.Card([
                     #dbc.CardHeader(Lottie(options=options, width="35%", height="35%", url=url_requests)),
-                    dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Advise.png', style={'height':'25%','width':'15%', "float": "center"})],  className = 'text-center'),
+                    dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Advise.png', style={'height':'40%','width':'40%', "float": "center"})],  className = 'text-center'),
                     dbc.CardBody([
 						html.H4(id ="total_requests", children=0),
                         html.P("Total requests") 
@@ -289,55 +294,55 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ]),
             
-        ], className='m-0', width=2),
+        ], className='m-0', width=2, xs=8, sm=8, md=8, lg=2, xl=2 ),
 		
         # column 2_2
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL-41.png', style={'height':'45%','width':'35%', "float": "center"})],  className = 'text-center'),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL-41.png', style={'height':'100%','width':'91%', "float": "center"})],  className = 'text-center'),
                 dbc.CardBody([
 					html.H4(id="resolved_requests", children=0),
-                    html.P("Resolved requests"),
+                    html.P("Resolved"),
                 ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
-        ], className='m-0', width=2),
+        ], className='m-0', width=2,  xs=8, sm=8, md=8, lg=2, xl=2),
 
         # column 2_3
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "center"})], className='text-center'),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_dialogue.png', style={"textAlign": "center", 'height':'57%','width':'56%', "float": "center"})], className='text-center'),
                 dbc.CardBody([
 					html.H4(id="unresolved_requests", children=0),
                     html.P("In process"),
                 ],style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ],  ),
             
-        ], className='text-center m-0', width=2),
+        ], className='text-center m-0', width=2,  xs=8, sm=8, md=8, lg=2, xl=2),
 
         # column 2_4
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_COUNTRY-OFFICES.png', style={'height':'25%','width':'15%', "float": "center"})],  className = 'text-center'),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_COUNTRY-OFFICES.png', style={'height':'45%','width':'24%', "float": "center"})],  className = 'text-center'),
                 dbc.CardBody([
 					html.H4(id="organizations_assisted", children=0),
                     html.P("Organizations assisted"),
                 ], style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ]),
             
-        ], className='m-0', width=2),
+        ], className='m-0', width=3,  xs=8, sm=8, md=8, lg=3, xl=3),
 
         # column 2_3
         dbc.Col([
             dbc.Card([
-                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Outreach-And-Dialogue.png', style={"textAlign": "center", 'height':'15%','width':'22%', "float": "center"})], className = 'text-center' ),
+                dbc.CardHeader([dbc.CardImg(src='/assets/All-Icons-OL_Outreach-And-Dialogue.png', style={"textAlign": "center", 'height':'45%','width':'35%', "float": "center"})], className = 'text-center' ),
                 dbc.CardBody([
 					html.H4(id="coordination_meetings", children=0),
                     html.P("Coordination meetings"),
                 ],style={"textAlign": "center", 'height':'70px', "font-family": "Arial", "font-weight": "bold", 'font-size': '12px'})
             ],  ),
             
-        ], className='m-0', width=2),
+        ], className='m-0', width=3,  xs=8, sm=8, md=8, lg=3, xl=3),
 
 
     ], justify="center", className='mb-0'),
@@ -354,7 +359,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
                     dcc.Graph(id="line_chart", figure={})
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=6),
+        ], width=6, xs=10, sm=10, md=10, lg=6, xl=6),
 
         dbc.Col([
             dbc.Card([
@@ -363,7 +368,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=6)
+        ], width=6, xs=10, sm=10, md=10, lg=6, xl=6)
     ], className='text-center mb-3'),
 
         # defining the fourth row
@@ -375,7 +380,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=5),
+        ], width=5, xs=10, sm=10, md=10, lg=5, xl=5),
 
         dbc.Col([
             dbc.Card([
@@ -384,7 +389,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=7)
+        ], width=7, xs=10, sm=10, md=10, lg=7, xl=7)
     ], className='mb-3'),
 
 
@@ -397,7 +402,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ],), # className="border-0 bg-transparent"
-        ], width=4),
+        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4),
 
 
         dbc.Col([
@@ -407,7 +412,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), # className="border-0 bg-transparent"
-        ], width=4),
+        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4),
 
 
         dbc.Col([
@@ -417,7 +422,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=4)
+        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4)
     ], className='mb-1'),
 
 # Last row
@@ -575,9 +580,7 @@ def update_line_chart(date_range, month_range ):
     line_chart = px.line(df_month, x="month_abbr", y="Total requested", text="Total requested", title="Total requests by month", template="ggplot2")
     line_chart.update_traces(mode="markers+lines+text",fill="tozeroy", line=dict(color="#be2126"),\
                              marker=dict(size=df_month["Total requested"]+10, color="#be2126"))
-    
-    # line_chart.update_layout(title_x=0.5, xaxis_title="Month", yaxis_title="Total requests", font=dict(family="Arial", size=11, color="black"))
-    
+        
     # update the position or align of the graphic
     line_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
 
@@ -639,7 +642,7 @@ def update_vertical_bar_chart(date_range, month_range):
     df_reactions_copy= df_reactions_copy.groupby(["province"] )["Total requested number"].sum().reset_index().sort_values(by="Total requested number", ascending=False)
 
     # calculating percentage impacted by province
-    df_reactions_copy["percentage"] = round(df_reactions_copy["Total requested number"] / requests_number * 100,1)
+    df_reactions_copy["percentage"] = round(df_reactions_copy["Total requested number"] / requests_number * 100,0)
 
     # breaks string values if string is longer than 8 chr
     df_reactions_copy["province"] = df_reactions_copy["province"].apply(insert_break_after_2)
