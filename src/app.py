@@ -146,7 +146,6 @@ products_df = pd.concat([products_IM_df, products_CB_df], ignore_index=True)
 
 # Concatinating products_df and df_issues
 df_issues_products = pd.merge(products_df, df_issues, on='Key', how='outer')
-#print(df_issues_products)
 
 # Applying groupby on products
 df_issues_products = df_issues_products.groupby(["products", "year", "month", "month_abbr"] )["Key"].count().reset_index()
@@ -154,13 +153,6 @@ df_issues_products = df_issues_products.sort_values(by="Key", ascending=False)#.
 
 #requested products/training must this request cover
 df_issues_products.rename(columns={"Key": "Total products"}, inplace=True)
-#print(df_issues_products)
-
-#df_issues_products = df_issues_products[df_issues_locations["province"]!="Other..."]
-
-
-# # Concatinating locations_df and df_issues
-# df_issues_locations = pd.merge(locations_df, df_issues, on='Key', how='outer')
 
 # Creating sectors of work dataframe.
 # products in IM_service_request_df
@@ -402,7 +394,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ],), # className="border-0 bg-transparent"
-        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4),
+        ], width=3, xs=10, sm=10, md=10, lg=3, xl=3),
 
 
         dbc.Col([
@@ -412,7 +404,17 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), # className="border-0 bg-transparent"
-        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4),
+        ], width=3, xs=10, sm=10, md=10, lg=3, xl=3),
+
+        
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    dcc.Graph(id="pie_chart_donor", figure={})
+
+                ])
+            ], ), # className="border-2 bg-transparent"
+        ], width=3, xs=10, sm=10, md=10, lg=3, xl=3),
 
 
         dbc.Col([
@@ -422,7 +424,7 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.1vh", "width": "100%", "borderC
 
                 ])
             ], ), #className="border-0 bg-transparent"
-        ], width=4, xs=10, sm=10, md=10, lg=4, xl=4)
+        ], width=3, xs=10, sm=10, md=10, lg=3, xl=3)
     ], className='mb-1'),
 
 # Last row
@@ -602,7 +604,7 @@ def update_line_chart(date_range, month_range ):
     line_chart.update_yaxes(ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    line_chart.update_layout(title=dict(text="<b>Total requests by month</b>",\
+    line_chart.update_layout(title=dict(text="<b>Requests by month</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
     
     line_chart.update_layout(barmode='stack')
@@ -743,7 +745,7 @@ def update_horizontal_bar_chart(date_range, month_range):
     bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    bar_chart.update_layout(title=dict(text="<b>Total requets by status</b>",\
+    bar_chart.update_layout(title=dict(text="<b>Requets status</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
@@ -817,7 +819,7 @@ def update_products_chart(date_range, month_range):
     bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Products", yaxis_title="Number of products", font=dict(family='Arial', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Products", yaxis_title="Number", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
     bar_chart.update_xaxes(tickangle=90, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
@@ -829,7 +831,7 @@ def update_products_chart(date_range, month_range):
     bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    bar_chart.update_layout(title=dict(text="<b>Products requested</b>",\
+    bar_chart.update_layout(title=dict(text="<b>Products/services requested</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
@@ -882,7 +884,7 @@ def update_vertical_bar_chart(date_range, month_range):
     bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Services", yaxis_title="Number of requests", font=dict(family='Arial', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Services", yaxis_title="Number", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
     bar_chart.update_xaxes(tickangle=0, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
@@ -894,7 +896,7 @@ def update_vertical_bar_chart(date_range, month_range):
     bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    bar_chart.update_layout(title=dict(text="<b>Total service requested by type</b>",\
+    bar_chart.update_layout(title=dict(text="<b>Type of service requested</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
@@ -944,7 +946,7 @@ def update_pie_chart(date_range, month_range):
     pie_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
 
     # update title
-    pie_chart.update_layout(title=dict(text="<b>Total agency type</b>",\
+    pie_chart.update_layout(title=dict(text="<b>Agency type</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
     
     # Update hover template
@@ -952,6 +954,58 @@ def update_pie_chart(date_range, month_range):
     
     return pie_chart
     
+
+# # Pie chart donnors *******************************************************************
+@app.callback(
+    Output("pie_chart_donor", "figure"),
+    Input("date-range-slider", "value"),
+    Input('month-range-slider', "value") 
+)
+
+def update_pie_chart(date_range, month_range):
+	
+
+    # Picking the years from the date slicer
+    start_date = dt.fromtimestamp(date_range[0]).year
+    end_date = dt.fromtimestamp(date_range[1]).year
+
+    # Picking the months from the date slicer
+    start_month = month_range[0]
+    end_month = month_range[1]
+	
+    # IM_service_request_df_copy= IM_service_request_df[["Key", "agency_type.choices0" ]].copy()
+    # df_issues_copy =df_issues[["Key", "year", "month", "month_abbr"]].copy()
+
+    df_usaid_funded= pd.merge(IM_service_request_df[["Key", "usaid_funded.choices0" ]], df_issues[["Key", "year", "month", "month_abbr"]], on='Key', how='inner')
+	
+    # filtering the dataframe using the picked years from the date slicer df_issues_agency_type_copy
+    df_usaid_funded = df_usaid_funded[(df_usaid_funded["year"] >= start_date) & (df_usaid_funded["year"] <= end_date)]
+    df_usaid_funded = df_usaid_funded[(df_usaid_funded["month"] >= start_month) & (df_usaid_funded["month"] <= end_month)]
+
+    # grouping by agency type
+    df_usaid_funded = df_usaid_funded.groupby(['usaid_funded.choices0'] )["Key"].count().reset_index().sort_values(by="Key", ascending=False)
+    
+    # building the bar chart and the chosing the color of the graphic
+    pie_chart = px.pie(names=df_usaid_funded['usaid_funded.choices0'], values = df_usaid_funded["Key"],\
+                       template="ggplot2", color_discrete_sequence=px.colors.sequential.Reds_r, hole=.5)
+
+    # update the position or align of the graphic
+    pie_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
+    
+    # update the place where the legend are going to apear
+    pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",  font=dict(color='black', size=10, family='Arial'), x=0.9))
+
+    # Change background color 
+    pie_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
+
+    # update title
+    pie_chart.update_layout(title=dict(text="<b>Agencies funded by USAID</b>",\
+                                       font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
+    
+    # Update hover template
+    pie_chart.update_traces(hovertemplate="%{value} agencies are: <b> %{label} </b><br> funded by USAID")
+    
+    return pie_chart
 
 # tbd chart *******************************************************************
 @app.callback(
@@ -997,10 +1051,10 @@ def update_products_chart(date_range, month_range):
     bar_chart.update_yaxes(showline=True, linewidth=1, linecolor='white', gridcolor='white')
 
     # Update title, color for xaxis and yaxis.
-    bar_chart.update_layout(xaxis_title="Sectors", yaxis_title="Number of agency", font=dict(family='Arial', size=10, color="black"))
+    bar_chart.update_layout(xaxis_title="Sectors", yaxis_title="Number", font=dict(family='Arial', size=10, color="black"))
 
     # Update the style of xaxis values
-    bar_chart.update_xaxes(tickangle=0, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
+    bar_chart.update_xaxes(tickangle=90, ticklen=0, tickfont=dict(color='black', size=10, family='Arial'))
 
     # Update Update the style of yaxis values
     bar_chart.update_yaxes(tickangle=0, ticklen=0, showticklabels=False, tickfont=dict(color='black', size=10, family='Arial'))
@@ -1009,7 +1063,7 @@ def update_products_chart(date_range, month_range):
     bar_chart.update_yaxes(tickfont=dict(color='black', size=10, family='Arial'))
 
     # update title
-    bar_chart.update_layout(title=dict(text="<b>Distribution of agency work sectors</b>",\
+    bar_chart.update_layout(title=dict(text="<b>Partners by sector</b>",\
                                        font=dict(family='Arial', size=12, color="black",), yref='paper'), title_x=0,)
 
     # Update hover template
