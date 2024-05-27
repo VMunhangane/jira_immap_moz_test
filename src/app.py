@@ -38,7 +38,7 @@ def insert_break_after_2(text):
 
 
 # import data from csv sheets **********************************************************
-agency_type_immap_id_labels_df_2 = pd.read_csv('agency_type_immap_id_labels_df_2.csv', low_memory=False, encoding="iso-8859-1")
+#agency_type_immap_id_labels_df_2 = pd.read_csv('agency_type_immap_id_labels_df_2.csv', low_memory=False, encoding="iso-8859-1")
 IM_service_request_df = pd.read_csv('IM_service_request_df.csv', low_memory=False, encoding="iso-8859-1")
 capacity_building_df = pd.read_csv('capacity_building_df.csv', low_memory=False, encoding="iso-8859-1")
 coordination_meetings = pd.read_csv('coordination meetings.csv', low_memory=False, encoding="iso-8859-1")
@@ -95,13 +95,16 @@ locations_IM_df = IM_service_request_df[["Key"]+list_columns_IM]
 # melting locations_IM_df
 locations_IM_df = pd.melt(locations_IM_df, id_vars =['Key'], value_vars =list_columns_IM, var_name ='locations', value_name ='province')
 
+#print(list(capacity_building_df[ 'locations.text']))
+
+
 # locations in capacity_building_df
-capacity_building_df["locations.choices0"]= ['Cabo Delgado', "Maputo", "Maputo"]
-capacity_building_df["locations.choices1"]= [None, "Cabo Delgado", "Cabo Delgado"]
-capacity_building_df["locations.choices2"]= [None, None, "Nampula"]
-capacity_building_df["locations.choices3"]= [None, None, "Niassa"]
-capacity_building_df["locations.choices4"]= [None, None, "Zambezia"]
-capacity_building_df["locations.choices5"]= [None, None, "Sofala"]
+capacity_building_df["locations.choices0"]= ["Cabo Delgado", None, 'Cabo Delgado', "Maputo", "Maputo"]
+capacity_building_df["locations.choices1"]= [None, None, None, "Cabo Delgado", "Cabo Delgado"]
+capacity_building_df["locations.choices2"]= [None, None, None, None, "Nampula"]
+capacity_building_df["locations.choices3"]= [None, None, None, None, "Niassa"]
+capacity_building_df["locations.choices4"]= [None, None, None, None, "Zambezia"]
+capacity_building_df["locations.choices5"]= [None, None, None, None, "Sofala"]
 list_columns_CB= [col for col in capacity_building_df.columns if 'locations.choices' in col]
 locations_CB_df= capacity_building_df[["Key"]+list_columns_CB]
 
@@ -993,7 +996,7 @@ def update_pie_chart(date_range, month_range):
     pie_chart.update_layout(margin=dict(l=10, r=10, t=23, b=20))
     
     # update the place where the legend are going to apear
-    pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",  font=dict(color='black', size=10, family='Arial'), x=0.9))
+    pie_chart.update_legends(dict(orientation="h" , yanchor="bottom",  y=-0.05,   xanchor="right",  font=dict(color='black', size=10, family='Arial'), x=0.8))
 
     # Change background color 
     pie_chart.update_layout({"plot_bgcolor": "rgba(0, 0, 0, 0)","paper_bgcolor": "rgba(0, 0, 0, 0)",})
