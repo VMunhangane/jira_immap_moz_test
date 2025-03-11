@@ -206,7 +206,7 @@ app.layout = dbc.Container([
         # column with card 1_2
         dbc.Col([
             dbc.Card([
-                dbc.CardImg(src='/assets/USAID-iMMAP-Logo.png', style={'height':'90%','width':'90%', "float": "center"}, className = 'align-self-right'),
+                dbc.CardImg(src='/assets/USAID-iMMAP-Log.png', style={'height':'90%','width':'90%', "float": "center"}, className = 'align-self-right'),
             ],style = {"textAlign": "left"}, className="mb-0 border-0 bg-transparent"),
 
         ], className = 'align-self-center',  width=5, xs=10, sm=10, md=5, lg=5, xl=5),
@@ -258,11 +258,11 @@ app.layout = dbc.Container([
 
 
         
-        # column with card 1_1
+        # column with card 1_1 #https://immapmoz.org/catalog/
         dbc.Col([
             dbc.Card([
-                dbc.CardImg(src='/assets/iMMAP_moz.png', style={'height':'100%','width':'100%'}, className = 'align-self-center'),
-                            dbc.CardLink("iMMAP Moz catalog", target="_blank", href="https://immapmoz.org/catalog/"),
+                dbc.CardImg(src='/assets/iMMAP_mo_z.png', style={'height':'100%','width':'100%'}, className = 'align-self-center'),
+                            dbc.CardLink("Moz catalog", target="_blank", href=""),
             ], style = {"textAlign": "center"}, className="mb-0 border-0 bg-transparent text-center", ),
 
         ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'},\
@@ -446,10 +446,10 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.4vh", "width": "100%", "borderC
         ], className = 'align-self-center',  width=1),
 
 
-        # column with card 1_2
+        # column with card 1_2 #www.immap.org #https://www.immap.org
         dbc.Col([
             dbc.Card([
-                dbc.CardLink("www.immap.org ", target="_blank", href="https://www.immap.org"),
+                dbc.CardLink("", target="_blank", href=""),
             ],style={'height':'100%','width':'100%', "float": "center", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
 
         ], style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
@@ -464,11 +464,11 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.4vh", "width": "100%", "borderC
         ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
 
 
-        # column with card 1_1
+        # column with card 1_1#rep-mozambique@immap.org #rep-mozambique@immap.org
         dbc.Col([
             dbc.Card([
 
-            dbc.CardLink("rep-mozambique@immap.org", target="_blank", href="rep-mozambique@immap.org"),
+            dbc.CardLink("", target="_blank", href=""),
             ],style={'height':'100%','width':'100%', "float": "center", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
 
         ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
@@ -483,10 +483,10 @@ dbc.Row(dbc.Col(html.Hr(style={'borderWidth': "0.4vh", "width": "100%", "borderC
         ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=1),
 
 
-    # column with card 1_1
+    # column with card 1_1 #https://www.immap.org
         dbc.Col([
             dbc.Card([
-            dbc.CardLink("Maputo, Mozambique", target="_blank", href="https://www.immap.org"),]
+            dbc.CardLink("Maputo, Mozambique", target="_blank", href=""),]
             ,style={'height':'100%','width':'100%', "float": "left", "textAlign": "left"}, className = "mb-0 border-0 bg-transparent"),
         ],  style={"font-family": "Arial", "font-weight": "bold", 'font-size': '9.5px'}, className = 'align-self-center', width=3),
 
